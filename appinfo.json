@@ -9,7 +9,7 @@
     "resources": {
         "media": [
             {
-                "file": "fonts/perfect-dos-vga-437.font",
+                "file": "fonts/perfect-dos-vga.ttf",
                 "name": "FONT_PERFECT_DOS_48",
                 "type": "font"
             }
