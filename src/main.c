@@ -9,8 +9,10 @@
 static Window *s_main_window;
 static TextLayer *s_time_layer;
 static TextLayer *s_date_layer;
+static TextLayer *s_weather_layer;
 static GFont s_time_font;
 static GFont s_date_font;
+static GFont s_weather_font;
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
 
@@ -39,22 +41,8 @@ static void update_time() {
   text_layer_set_text(s_date_layer, buffer2);
 }
 
-static void update_date() {
-//   time_t temp = time(NULL);
-//   struct tm *tick_time = localtime(&temp);
-  
-//   static char buffer[] = " ";
-  
-//   strftime(buffer, sizeof(" Sept 31 "), "%b %d", tick_time);
-//   text_layer_set_text(s_date_layer, buffer);
-}
-
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
-}
-
-static void date_tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  update_date();
 }
   
 static void main_window_load(Window *window) {
@@ -70,35 +58,52 @@ static void main_window_load(Window *window) {
   text_layer_set_text_color(s_time_layer, GColorBlack);
   text_layer_set_text(s_time_layer, TIME_TEMPLATE);
   
+  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_48));
+  text_layer_set_font(s_time_layer, s_time_font);
+  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
+  
   // Create date TextLayer
   s_date_layer = text_layer_create(GRect(5, 10, 139, 40));
   text_layer_set_background_color(s_date_layer, GColorClear);
   text_layer_set_text_color(s_date_layer, GColorWhite);
-  text_layer_set_text(s_date_layer, DATE_TEMPLATE);
+  text_layer_set_text(s_date_layer, "");
   
-  // Create GFont
-  s_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_48));
   s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_32));
-  
-  // Apply to TextLayer
-  text_layer_set_font(s_time_layer, s_time_font);
-  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
-  
   text_layer_set_font(s_date_layer, s_date_font);
   text_layer_set_text_alignment(s_date_layer, GTextAlignmentLeft);
-  
-  // Add it as a child later to the Window's root layer
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
+  
+  // Create temperature Layer
+  s_weather_layer = text_layer_create(GRect(0, 130, 144, 25));
+  text_layer_set_background_color(s_weather_layer, GColorClear);
+  text_layer_set_text_color(s_weather_layer, GColorWhite);
+  text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
+  text_layer_set_text(s_weather_layer, "Loading...");
+  
+  s_weather_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
+  text_layer_set_font(s_weather_layer, s_weather_font);
+  text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
 }
 
 static void main_window_unload(Window *window) {
+  
+  // Destroy background
   gbitmap_destroy(s_background_bitmap);
   bitmap_layer_destroy(s_background_layer);
-  fonts_unload_custom_font(s_time_font);
-  fonts_unload_custom_font(s_date_font);
+  
+  // Destroy time elements
   text_layer_destroy(s_time_layer);
+  fonts_unload_custom_font(s_time_font);
+  
+  // Destroy date elements
   text_layer_destroy(s_date_layer);
+  fonts_unload_custom_font(s_date_font);
+  
+  // Destroy weather elements
+  text_layer_destroy(s_weather_layer);
+  fonts_unload_custom_font(s_weather_font);
 }
 
 static void init() {
@@ -113,14 +118,12 @@ static void init() {
   
   // Make sure time is displayed from the start
   update_time();
-  update_date();
   
   // Show the Window on the watch, with animated=true
   window_stack_push(s_main_window, true);
   
   // Register with TickTimerService
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-//   tick_timer_service_subscribe(DAY_UNIT, date_tick_handler);
 }
 
 static void deinit() {
