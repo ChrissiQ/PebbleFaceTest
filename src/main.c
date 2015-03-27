@@ -3,19 +3,25 @@
   
 #define TIME_TEMPLATE "00:00"
 #define DATE_TEMPLATE "Sept 31"
+  
 #define FONT_SECONDS FONT_KEY_BITHAM_30_BLACK
 #define FONT_MINUTES FONT_KEY_BITHAM_42_BOLD
+  
 #define KEY_TEMPERATURE 0
 #define KEY_CONDITIONS 1
 
 static Window *s_main_window;
+
 static TextLayer *s_time_layer;
 static TextLayer *s_date_layer;
 static TextLayer *s_weather_layer;
+
 static GFont s_time_font;
 static GFont s_date_font;
 static GFont s_weather_font;
+
 static BitmapLayer *s_background_layer;
+
 static GBitmap *s_background_bitmap;
 
 static void update_time() {
