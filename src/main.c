@@ -51,6 +51,19 @@ static void update_time() {
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
+  
+  // Get weather update every 30 minutes
+  if (tick_time->tm_min % 30 == 0) {
+    // Begin dictionary
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    
+    // Add a key-value pair
+    dict_write_uint8(iter, 0, 0);
+    
+    // Send the message
+    app_message_outbox_send();
+  }
 }
   
 static void main_window_load(Window *window) {
@@ -72,14 +85,14 @@ static void main_window_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
   
   // Create date TextLayer
-  s_date_layer = text_layer_create(GRect(5, 10, 139, 40));
+  s_date_layer = text_layer_create(GRect(0, 13, 144, 39));
   text_layer_set_background_color(s_date_layer, GColorClear);
   text_layer_set_text_color(s_date_layer, GColorWhite);
   text_layer_set_text(s_date_layer, "");
   
-  s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_32));
+  s_date_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_PERFECT_DOS_20));
   text_layer_set_font(s_date_layer, s_date_font);
-  text_layer_set_text_alignment(s_date_layer, GTextAlignmentLeft);
+  text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_date_layer));
   
   // Create temperature Layer
